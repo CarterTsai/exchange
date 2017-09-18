@@ -29,7 +29,40 @@ func cathaybk() {
 
 		if strings.Contains(g.Eq(0).Text(), "日圓(JPY)") {
 			price := fmt.Sprintf("賣出價 %s \n", g.Eq(2).Text())
-			Title := transformWord("日圓(JPY)")
+			Title := transformWord("國泰 日圓(JPY)")
+			Message := transformWord(price)
+			fmt.Println(price)
+
+			notification := toast.Notification{
+				AppID:   "Example App",
+				Title:   Title,
+				Message: Message,
+				Icon:    "", // This file must exist (remove this line if it doesn't)
+				Actions: []toast.Action{},
+			}
+			err := notification.Push()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+	})
+}
+
+// bot 台灣銀行匯率
+func bot() {
+	doc, err := goquery.NewDocument("http://rate.bot.com.tw/xrt?Lang=zh-TW")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Find the review items
+	table := ".container > table > tbody > tr"
+	doc.Find(table).Each(func(i int, s *goquery.Selection) {
+		g := s.Find("td")
+		exchangeName := strings.TrimSpace(strings.Replace(g.Eq(0).Find(".print_show").Text(), " ", "", -1))
+		if strings.Contains(exchangeName, "日圓(JPY)") {
+			price := fmt.Sprintf("賣出價 %s \n", g.Eq(2).Text())
+			Title := transformWord("台灣銀行 日圓(JPY)")
 			Message := transformWord(price)
 			fmt.Println(price)
 
@@ -50,4 +83,5 @@ func cathaybk() {
 
 func main() {
 	cathaybk()
+	bot()
 }
